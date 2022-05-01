@@ -5,6 +5,8 @@ import { expect } from 'chai';
 
 import parse from './index.js';
 
+console.info(JSON.stringify(parse('[', ']').do('This [is [my [nested [string]]]]'), null, 4));
+
 describe('parser', () => {
 	it ('should come back with parsed tree (with escapes).', () => {
 		expect(parse('[', ']').do('This [is [my [\\[nested\\]] string]].')).to.eql([
