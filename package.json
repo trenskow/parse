@@ -1,0 +1,30 @@
+{
+  "name": "@trenskow/parse",
+  "version": "0.1.0",
+  "description": "A small library for parsing a string into a tree.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/mocha ./test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trenskow/parse.git"
+  },
+  "keywords": [
+    "parse",
+    "string",
+    "nested"
+  ],
+  "author": "Kristian Trenskow",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/trenskow/parse/issues"
+  },
+  "homepage": "https://github.com/trenskow/parse#readme",
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "eslint": "^8.14.0",
+    "mocha": "^10.0.0"
+  }
+}
