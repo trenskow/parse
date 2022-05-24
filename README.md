@@ -10,7 +10,9 @@ Below is an example on how to use the library.
 ````javascript
 import parse from '@trenskow/parse';
 
-parse('${', '}').do('This ${is ${my ${nested ${string}}}}');
+parse('${', '}', {
+    ignoreInside: ['"', '\'']
+}).do('This ${\'is\' ${my ${"nested" ${string}}}}');
 ````
 
 The above example will return the following structure
@@ -30,6 +32,8 @@ The above example will return the following structure
     ]
 ]
 ````
+
+> One caveat: opening and closing token cannot be the same.
 
 # License
 

@@ -5,23 +5,7 @@ import { expect } from 'chai';
 
 import parse from './index.js';
 
-console.info(JSON.stringify(parse('[', ']').do('This [is [my [nested [string]]]]'), null, 4));
-
 describe('parser', () => {
-	it ('should come back with parsed tree (with escapes).', () => {
-		expect(parse('[', ']').do('This [is [my [\\[nested\\]] string]].')).to.eql([
-			'This ',
-			[
-				'is ',
-				[
-					'my ',
-					'[nested]',
-					' string'
-				]
-			],
-			'.'
-		]);
-	});
 	it ('should come back with parsed tree.', () => {
 		expect(parse('{', '}').do('This {is {my {nested} string}}.')).to.eql([
 			'This ',
@@ -30,6 +14,20 @@ describe('parser', () => {
 				[
 					'my ',
 					'nested',
+					' string'
+				]
+			],
+			'.'
+		]);
+	});
+	it ('should come back with parsed tree (with escapes).', () => {
+		expect(parse('[', ']').do('This [is [my [\\[nested\\]] string]].')).to.eql([
+			'This ',
+			[
+				'is ',
+				[
+					'my ',
+					'[nested]',
 					' string'
 				]
 			],
@@ -50,6 +48,27 @@ describe('parser', () => {
 			],
 			'.']);
 	});
+	it ('should come back with parsed tree (with ignore).', () => {
+		expect(parse('[', ']', { ignoreInside: ['"', '\''] }).do('This [is "my [\'nested\']" [string]]')).to.eql([
+			'This ',
+			[
+				'is "my [\'nested\']" ',
+				'string'
+			]
+		]);
+	});
+	it ('should come back with parsed tree (max depth = 1).', () => {
+		expect(parse('[', ']', { maxDepth: 1 }).do('This [is [my nested string]].')).to.eql([
+			'This ',
+			'is [my nested string]',
+			'.'
+		]);
+	});
+	it ('should come back with parsed tree (max depth = 0).', () => {
+		expect(parse('[', ']', { maxDepth: 0 }).do('This [is [my nested string]].')).to.eql(
+			'This [is [my nested string]].'
+		);
+	});
 	it ('should throw an error if closing token is missing.', () => {
 		expect(() => {
 			parse('[', ']').do('[this');
@@ -69,5 +88,25 @@ describe('parser', () => {
 		expect(() => {
 			parse('123', '123').do('[this');
 		}).to.throw('Opening and closing tokens cannot be the same.');
+	});
+	it ('should throw an error if options is not an object.', () => {
+		expect(() => {
+			parse('[', ']', '123');
+		}).to.throw('Options must be an object');
+	});
+	it ('should throw an error if ignoreInside is not a string.', () => {
+		expect(() => {
+			parse('[', ']', { ignoreInside: null });
+		}).to.throw('Ignore inside must be a string.');
+	});
+	it ('should throw an error if maxDepth is not a number.', () => {
+		expect(() => {
+			parse('[', ']', { maxDepth: true });
+		}).to.throw('Max depth must be a number.');
+	});
+	it ('should throw an error if max depth is less that zero.', () => {
+		expect(() => {
+			parse('[', ']', { maxDepth: -1 });
+		}).to.throw('Max depth must be greater than zero.');
 	});
 });
