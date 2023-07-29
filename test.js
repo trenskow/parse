@@ -34,6 +34,21 @@ describe('parser', () => {
 			'.'
 		]);
 	});
+	it ('should come back with parsed tree (with escapes and boundaries).', () => {
+		expect(parse('[', ']', { boundaries: 'include' }).do('This [is [my [\\[nested\\]] string]].')).to.eql([
+			'This ',
+			[
+				'[is ',
+				[
+					'[my ',
+					'[[nested]]',
+					' string]'
+				],
+				']'
+			],
+			'.'
+		]);
+	});
 	it ('should come back with parsed tree (long tokens).', () => {
 		expect(parse('hello', 'goodbye').do('This hello is hello my hello nested goodbye string goodbye goodbye.')).to.eql([
 			'This ',
@@ -108,5 +123,10 @@ describe('parser', () => {
 		expect(() => {
 			parse('[', ']', { maxDepth: -1 });
 		}).to.throw('Max depth must be greater than zero.');
+	});
+	it ('should throw an error if boundaries is unknown value.', () => {
+		expect(() => {
+			parse('[', ']', { boundaries: 'wrong' });
+		}).to.throw('Boundaries must be either `\'exclude\'` (default) or `\'include\'`.');
 	});
 });

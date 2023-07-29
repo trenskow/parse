@@ -37,6 +37,14 @@ export default (opening, closing, options) => {
 		throw new TypeError('Max depth must be a number.');
 	}
 
+	let boundaries = options.boundaries;
+
+	if (typeof boundaries === 'undefined') boundaries = 'exclude';
+
+	if (!['exclude', 'include'].includes(boundaries)) {
+		throw new TypeError('Boundaries must be either `\'exclude\'` (default) or `\'include\'`.');
+	}
+
 	if (maxDepth < 0) {
 		throw new TypeError('Max depth must be greater than zero.');
 	}
@@ -77,11 +85,17 @@ export default (opening, closing, options) => {
 							if (text.substring(idx, idx + opening.length) === opening) {
 
 								if (maxDepth > depth) {
+
 									result.push(literal);
+
 									let value;
+
 									[idx, value] = next(text, idx + opening.length, depth + 1);
+
 									result.push(value);
+
 									literal = '';
+
 								} else {
 									literal += text[idx];
 									ignoredDepths++;
@@ -95,6 +109,17 @@ export default (opening, closing, options) => {
 
 									if (result.length === 1 && typeof result[0] === 'string') {
 										result = result[0];
+									}
+
+									if (depth > 0 && boundaries === 'include') {
+										if (Array.isArray(result)) {
+											if (Array.isArray(result[0])) result[0] = [opening].concat(result[0]);
+											else result[0] = `${opening}${result[0]}`;
+											if (Array.isArray(result[result.length - 1])) result.push(closing);
+											else result[result.length - 1] = `${result[result.length - 1]}${closing}`;
+										} else {
+											result = `${opening}${result}${closing}`;
+										}
 									}
 
 									return [idx + closing.length - 1, result];
