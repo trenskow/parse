@@ -113,9 +113,9 @@ export default (...args) => {
 
 							if (typeof boundary !== 'undefined') {
 
-								if (maxDepth > depth) {
+								foundBoundaries.push(boundary);
 
-									foundBoundaries.push(boundary);
+								if (maxDepth > depth) {
 
 									let value;
 
@@ -132,9 +132,9 @@ export default (...args) => {
 
 							} else if (typeof nextBoundary !== 'undefined' && text.substring(idx, idx + nextBoundary[1].length) === nextBoundary[1]) {
 
-								if (ignoredDepths === 0) {
+								foundBoundaries.pop();
 
-									foundBoundaries.pop();
+								if (ignoredDepths === 0) {
 
 									if (depth > 0 && options.boundaries === 'include') {
 										if (Array.isArray(result[0])) result[0] = [nextBoundary[0]].concat(result[0]);

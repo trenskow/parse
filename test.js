@@ -73,10 +73,10 @@ describe('parser', () => {
 		]);
 	});
 	it ('should come back with parsed tree (max depth = 1).', () => {
-		expect(parse('[', ']', { maxDepth: 1 }).do('This [is [my nested string]].')).to.eql([
+		expect(parse([['${', '}'], ['$[', ']']], { boundaries: 'include', maxDepth: 1 }).do('This ${is $[a]} test')).to.eql([
 			'This ',
-			'is [my nested string]',
-			'.'
+			'${is $[a]}',
+			' test'
 		]);
 	});
 	it ('should come back with parsed tree (max depth = 0).', () => {
