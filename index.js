@@ -1,19 +1,41 @@
 // Created 02/05/22 by Kristian Trenskow
 // See LICENSE for license.
 
-export default (opening, closing, options) => {
+export default (...args) => {
 
-	if (typeof opening !== 'string' || typeof closing !== 'string') {
-		throw new TypeError('Opening and closing tokens must be strings.');
+	let boundaries;
+	let options;
+
+	if (typeof args[0] === 'string') {
+		boundaries = args.slice(0, 2);
+		options = args[2];
+	} else {
+		[ boundaries, options ] = args;
 	}
 
-	if (opening.length === 0 || closing.length === 0) {
-		throw new TypeError('Opening and closing tokens cannot be zero-length.');
+	if (!Array.isArray(boundaries)) {
+		throw new TypeError('Boundaries must be an array.');
 	}
 
-	if (opening === closing) {
-		throw new TypeError('Opening and closing tokens cannot be the same.');
+	if (boundaries.every((boundary) => typeof boundary === 'string')) {
+		boundaries = [boundaries];
 	}
+
+	boundaries
+		.forEach((boundaries) => {
+			if (boundaries.length !== 2) {
+				throw new TypeError('Boundaries must be an array containing the opening and closing boundary.');
+			}
+			if (!boundaries.every((boundary) => typeof boundary === 'string')) {
+				throw new TypeError('Boundaries must be strings.');
+			}
+			if (!boundaries.every((boundary) => boundary.length > 0)) {
+				throw new TypeError('Boundaries cannot be zero-length.');
+			}
+			if (boundaries.every((boundary) => boundary === boundaries[0])) {
+				throw new TypeError('Boundary tokens cannot be the same.');
+			}
+		});
 
 	if (typeof options === 'undefined') options = {};
 	if (typeof options !== 'object' || options === null) {
@@ -37,11 +59,9 @@ export default (opening, closing, options) => {
 		throw new TypeError('Max depth must be a number.');
 	}
 
-	let boundaries = options.boundaries;
+	if (typeof options.boundaries === 'undefined') options.boundaries = 'exclude';
 
-	if (typeof boundaries === 'undefined') boundaries = 'exclude';
-
-	if (!['exclude', 'include'].includes(boundaries)) {
+	if (!['exclude', 'include'].includes(options.boundaries)) {
 		throw new TypeError('Boundaries must be either `\'exclude\'` (default) or `\'include\'`.');
 	}
 
@@ -54,18 +74,24 @@ export default (opening, closing, options) => {
 	return {
 		do: (text) => {
 
+			let foundBoundaries = [];
+
 			const next = (text, offset, depth) => {
 
-				let result = [];
-
-				let literal = '';
+				let result = [''];
 
 				let idx = offset;
 				let ignoredDepths = 0;
 
+				const appendResult = (text) => {
+					result[result.length - 1] += text;
+				};
+
 				for (idx ; idx < text.length ; idx++) {
 
-					if (text[idx] === '\\') literal += text[++idx];
+					const nextBoundary = foundBoundaries[foundBoundaries.length - 1];
+
+					if (text[idx] === '\\') appendResult(text[++idx]);
 					else {
 
 						const matchedIgnore = ignoreInside
@@ -74,7 +100,7 @@ export default (opening, closing, options) => {
 							.map(([_, matched]) => matched)[0];
 
 						if (typeof matchedIgnore !== 'undefined') {
-							literal += matchedIgnore;
+							appendResult(matchedIgnore);
 							if (matchedIgnore === ignoring[ignoring.length - 1]) {
 								ignoring.pop();
 							} else {
@@ -82,67 +108,72 @@ export default (opening, closing, options) => {
 							}
 						}
 						else if (ignoring.length === 0) {
-							if (text.substring(idx, idx + opening.length) === opening) {
+
+							const boundary = boundaries.find((boundaries) => text.substring(idx, idx + boundaries[0].length) === boundaries[0]);
+
+							if (typeof boundary !== 'undefined') {
 
 								if (maxDepth > depth) {
 
-									result.push(literal);
+									foundBoundaries.push(boundary);
 
 									let value;
 
-									[idx, value] = next(text, idx + opening.length, depth + 1);
+									[idx, value] = next(text, idx + boundary[0].length, depth + 1);
 
 									result.push(value);
 
-									literal = '';
+									result.push('');
 
 								} else {
-									literal += text[idx];
+									appendResult(text[idx]);
 									ignoredDepths++;
 								}
 
-							} else if (text.substring(idx, idx + closing.length) === closing) {
+							} else if (typeof nextBoundary !== 'undefined' && text.substring(idx, idx + nextBoundary[1].length) === nextBoundary[1]) {
 
 								if (ignoredDepths === 0) {
 
-									if (literal.length > 0) result.push(literal);
+									foundBoundaries.pop();
 
-									if (result.length === 1 && typeof result[0] === 'string') {
-										result = result[0];
+									if (depth > 0 && options.boundaries === 'include') {
+										if (Array.isArray(result[0])) result[0] = [nextBoundary[0]].concat(result[0]);
+										else result[0] = `${nextBoundary[0]}${result[0]}`;
+										if (Array.isArray(result[result.length - 1])) result.push(nextBoundary[1]);
+										else result[result.length - 1] = `${result[result.length - 1]}${nextBoundary[1]}`;
 									}
 
-									if (depth > 0 && boundaries === 'include') {
-										if (Array.isArray(result)) {
-											if (Array.isArray(result[0])) result[0] = [opening].concat(result[0]);
-											else result[0] = `${opening}${result[0]}`;
-											if (Array.isArray(result[result.length - 1])) result.push(closing);
-											else result[result.length - 1] = `${result[result.length - 1]}${closing}`;
-										} else {
-											result = `${opening}${result}${closing}`;
-										}
-									}
+									idx += nextBoundary[1].length - 1;
 
-									return [idx + closing.length - 1, result];
+									break;
 
 								} else {
-									literal += text[idx];
+									appendResult(text[idx]);
 									ignoredDepths--;
 								}
 
 							} else {
-								literal += text[idx];
+								appendResult(text[idx]);
 							}
 						}
-						else literal += text[idx];
+						else appendResult(text[idx]);
 
 					}
 				}
 
-				throw new Error('Missing closing token.');
+				if (Array.isArray(result)) {
+					result = result.filter((value) => value.length > 0);
+				}
+
+				if (result.length === 1 && typeof result[0] === 'string') {
+					result = result[0];
+				}
+
+				return [idx, result];
 
 			};
 
-			return next(text + closing, 0, 0)[1];
+			return next(text, 0, 0)[1];
 
 		}
 	};

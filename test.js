@@ -35,19 +35,19 @@ describe('parser', () => {
 		]);
 	});
 	it ('should come back with parsed tree (with escapes and boundaries).', () => {
-		expect(parse('[', ']', { boundaries: 'include' }).do('This [is [my [\\[nested\\]] string]].')).to.eql([
-			'This ',
+		expect(parse([['[', ']'], ['{', '}']], { boundaries: 'include' }).do('This [is {my [\\[nested\\]] string}].')).to.eql(
 			[
-				'[is ',
+				'This ',
 				[
-					'[my ',
-					'[[nested]]',
-					' string]'
+					'[is ',
+					[
+						'{my ',
+						'[[nested]]',
+						' string}'
+					],
+					']'
 				],
-				']'
-			],
-			'.'
-		]);
+				'.']);
 	});
 	it ('should come back with parsed tree (long tokens).', () => {
 		expect(parse('hello', 'goodbye').do('This hello is hello my hello nested goodbye string goodbye goodbye.')).to.eql([
@@ -86,23 +86,23 @@ describe('parser', () => {
 	});
 	it ('should throw an error if closing token is missing.', () => {
 		expect(() => {
-			parse('[', ']').do('[this');
-		}).to.throw('Missing closing token.');
+			parse('[').do('[this');
+		}).to.throw('Boundaries must be an array containing the opening and closing boundary.');
 	});
 	it ('should throw an error if opening or closing tokens are not a string.', () => {
 		expect(() => {
-			parse(0, 1).do('[this');
-		}).to.throw('Opening and closing tokens must be strings.');
+			parse([[0, 1]]).do('[this');
+		}).to.throw('Boundaries must be strings.');
 	});
 	it ('should throw an error if opening or closing tokens are zero-length.', () => {
 		expect(() => {
 			parse('', '').do('[this');
-		}).to.throw('Opening and closing tokens cannot be zero-length.');
+		}).to.throw('Boundaries cannot be zero-length.');
 	});
 	it ('should throw an error if opening or closing are the same.', () => {
 		expect(() => {
 			parse('123', '123').do('[this');
-		}).to.throw('Opening and closing tokens cannot be the same.');
+		}).to.throw('Boundary tokens cannot be the same.');
 	});
 	it ('should throw an error if options is not an object.', () => {
 		expect(() => {
