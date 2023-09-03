@@ -15,7 +15,7 @@ parse('${', '}', { /* options */ }).do('This ${is ${my ${nested ${string}}}}');
 
 The above example will return the following structure
 
-````JSON
+````javascript
 [
     'This ', [
         'is ', [
