@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/trenskow/parse#readme",
   "devDependencies": {
-    "chai": "^5.0.0",
+    "chai": "^5.0.3",
     "eslint": "^8.56.0",
     "mocha": "^10.2.0"
   }
