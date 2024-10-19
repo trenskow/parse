@@ -1,30 +1,33 @@
 {
-  "name": "@trenskow/parse",
-  "version": "0.1.22",
-  "description": "A small library for parsing a string into a tree.",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha ./test.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/trenskow/parse.git"
-  },
-  "keywords": [
-    "parse",
-    "string",
-    "nested"
-  ],
-  "author": "Kristian Trenskow",
-  "license": "BSD-2-Clause",
-  "bugs": {
-    "url": "https://github.com/trenskow/parse/issues"
-  },
-  "homepage": "https://github.com/trenskow/parse#readme",
-  "devDependencies": {
-    "chai": "^5.1.1",
-    "eslint": "^9.12.0",
-    "mocha": "^10.7.3"
-  }
+	"name": "@trenskow/parse",
+	"version": "0.1.22",
+	"description": "A small library for parsing a string into a tree.",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "node ./node_modules/mocha/bin/mocha ./test.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/trenskow/parse.git"
+	},
+	"keywords": [
+		"parse",
+		"string",
+		"nested"
+	],
+	"author": "Kristian Trenskow",
+	"license": "BSD-2-Clause",
+	"bugs": {
+		"url": "https://github.com/trenskow/parse/issues"
+	},
+	"homepage": "https://github.com/trenskow/parse#readme",
+	"devDependencies": {
+		"@eslint/eslintrc": "^3.1.0",
+		"@eslint/js": "^9.13.0",
+		"chai": "^5.1.1",
+		"eslint": "^9.13.0",
+		"globals": "^15.11.0",
+		"mocha": "^10.7.3"
+	}
 }
