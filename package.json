@@ -1,6 +1,6 @@
 {
 	"name": "@trenskow/parse",
-	"version": "0.1.30",
+	"version": "0.1.31",
 	"description": "A small library for parsing a string into a tree.",
 	"main": "index.js",
 	"type": "module",
